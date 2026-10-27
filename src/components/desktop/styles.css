@@ -1,0 +1,21 @@
+:root { color-scheme: dark; --shell: #0a0a12; --surface: #111822; --ink: #e8e8f5; --muted: #9a9ab5; --accent: #7fa97c; --edge: #343c48; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; overflow: hidden; background: var(--shell); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+#control-bar { position: fixed; inset: 0 0 auto; height: 80px; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--edge); }
+#address-form { flex: 1; min-width: 0; display: flex; gap: 10px; }
+button, input { font: inherit; }
+button { height: 44px; cursor: pointer; border: 1px solid var(--edge); border-radius: 12px; color: var(--ink); background: var(--shell); }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#back-btn { width: 44px; flex: 0 0 44px; font-size: 21px; }
+#address-bar { flex: 1; min-width: 0; height: 44px; padding: 0 18px; border: 1px solid var(--edge); border-radius: 999px; background: var(--shell); color: var(--ink); }
+#address-bar::placeholder { color: var(--muted); }
+#go-btn { padding: 0 22px; color: var(--shell); background: var(--accent); border-color: var(--accent); font-weight: 600; }
+#guest-placeholder { position: fixed; inset: 96px 16px 16px; border-radius: 18px; overflow: hidden; display: grid; place-items: center; text-align: center; background: var(--surface); }
+#guest-placeholder[hidden] { visibility: hidden; }
+h1 { margin: 0 0 12px; font-size: 38px; color: var(--accent); }
+p { color: var(--muted); line-height: 1.5; }
+#status { font-size: 12px; }
+#toolbar-status { position: fixed; top: 58px; left: 72px; right: 16px; margin: 0; font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

@@ -1,0 +1,64 @@
+# Base44 sandbox/dev environment for Matcha Air.
+#
+# Matcha Air is a Base44 "app code" project: a Vite + React single-page frontend
+# (the browser shell) whose backend is Base44's hosted platform (base44/functions/*,
+# base44/entities/*). There is no bundled API server to run, so this compose file
+# runs the frontend dev server from the cloned source with live reload.
+#
+# The src-tauri/ directory is a macOS desktop wrapper; it is not built or run here.
+
+name: matcha-air
+
+services:
+  web:
+    image: node:22
+    working_dir: /app
+    # Source is bind-mounted so edits are live. node_modules lives in a named
+    # volume and is synced from the lockfile at startup (see command below).
+    volumes:
+      - .:/app
+      - matcha_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      # Bare passthrough: the sandbox provides the value, Vite >= 6.1 appends it
+      # to server.allowedHosts so the preview proxy hostname is accepted.
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+      - BASE44_PREVIEW_MODE
+      - CI=true
+      # Matcha Air's backend is Base44's hosted platform for this app id — the
+      # same pair of defaults the app itself falls back to in
+      # src/lib/app-params.js. Setting the base URL makes @base44/vite-plugin
+      # proxy /api to it, which is the documented "frontend only, hosted
+      # backend" mode. Both values are public (already in the source); the app
+      # id is not a credential.
+      - VITE_BASE44_APP_ID=6ac98e2d78f3aeeb4ce7213b
+      - VITE_BASE44_APP_BASE_URL=https://matcha-browser.base44.app
+    # Install/sync deps from the lockfile after mounts are available, then run the
+    # dev server on 0.0.0.0:3000. The marker file skips reinstall on plain restarts.
+    command:
+      - sh
+      - -ec
+      - |
+        if [ ! -f node_modules/.matcha-air-installed ] || [ package-lock.json -nt node_modules/.matcha-air-installed ]; then
+          npm ci --no-audit --no-fund
+          touch node_modules/.matcha-air-installed
+        fi
+        exec npx vite --host 0.0.0.0 --port 3000
+    healthcheck:
+      # Probe real app responsiveness: the dev server must serve the SPA document.
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    restart: on-failure
+    labels:
+      base44.project: Matcha Air
+      base44.kind: web
+      base44.port: "3000"
+
+volumes:
+  matcha_node_modules:
